@@ -30,24 +30,34 @@ def LR_regression(x,y,tx):
 
 if __name__ == '__main__':
 
-    filename = './data.txt'
-    x, y = load_data(filename)
+    filename = '/data.txt'
+
+    import os
+    file_path = os.path.join(os.path.dirname(__file__) + filename)
+
+    print(file_path)
+    x, y = load_data(file_path)
+
 
     # test the Logistic model
     # from ML.LR_class import LR_class
     # LR = LR_class()
 
-    from ML.rewrite_classifiers.Perceptron_class import Perceptron_class
-    model = Perceptron_class()
-    #
-    # model.fit(x, y)
-    # y_pres = model.predict(x)
-    # print(y_pres)
-    # accuracy = accuracy_calculation(y,y_pres)
-    # print(accuracy)
-    # official_y_pres = LR_regression(x, y, x)
-    # accuracy_official = accuracy_calculation(y, official_y_pres)
-    # print(accuracy_official)
+    # from ML.rewrite_classifiers.Perceptron_class import Perceptron_class
+    # model = Perceptron_class()
+
+
+    from ML.rewrite_classifiers.Nativebayes_class import Nativebayes_class
+    model = Nativebayes_class()
+
+    model.fit(x, y)
+    y_pres = model.predict(x)
+    print(y_pres)
+    accuracy = accuracy_calculation(y,y_pres)
+    print(accuracy)
+    official_y_pres = LR_regression(x, y, x)
+    accuracy_official = accuracy_calculation(y, official_y_pres)
+    print(accuracy_official)
 
 
 
