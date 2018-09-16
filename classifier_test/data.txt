@@ -1,0 +1,83 @@
+             Id      v2a1  hacdor  rooms  hacapo  v14a  refrig  v18q  v18q1  \
+1  ID_f29eb3ddd  135000.0       0      4       0     1       1     1    1.0   
+2  ID_68de51c94       NaN       0      8       0     1       1     0    NaN   
+3  ID_d671db89c  180000.0       0      5       0     1       1     1    1.0   
+4  ID_d56d6f5f5  180000.0       0      5       0     1       1     1    1.0   
+5  ID_ec05b1a7b  180000.0       0      5       0     1       1     1    1.0   
+
+   r4h1   ...    SQBescolari  SQBage  SQBhogar_total  SQBedjefe  SQBhogar_nin  \
+1     0   ...            144    4489               1        144             0   
+2     0   ...            121    8464               1          0             0   
+3     0   ...             81     289              16        121             4   
+4     0   ...            121    1369              16        121             4   
+5     0   ...            121    1444              16        121             4   
+
+   SQBovercrowding  SQBdependency  SQBmeaned  agesq  Target  
+1         1.000000           64.0      144.0   4489       4  
+2         0.250000           64.0      121.0   8464       4  
+3         1.777778            1.0      121.0    289       4  
+4         1.777778            1.0      121.0   1369       4  
+5         1.777778            1.0      121.0   1444       4  
+
+[5 rows x 143 columns]zero numbers: Id                    0
+v2a1               6860
+hacdor                0
+rooms                 0
+hacapo                0
+v14a                  0
+refrig                0
+v18q                  0
+v18q1              7341
+r4h1                  0
+r4h2                  0
+r4h3                  0
+r4m1                  0
+r4m2                  0
+r4m3                  0
+r4t1                  0
+r4t2                  0
+r4t3                  0
+tamhog                0
+tamviv                0
+escolari              0
+rez_esc            7927
+hhsize                0
+paredblolad           0
+paredzocalo           0
+paredpreb             0
+pareddes              0
+paredmad              0
+paredzinc             0
+paredfibras           0
+                   ... 
+bedrooms              0
+overcrowding          0
+tipovivi1             0
+tipovivi2             0
+tipovivi3             0
+tipovivi4             0
+tipovivi5             0
+computer              0
+television            0
+mobilephone           0
+qmobilephone          0
+lugar1                0
+lugar2                0
+lugar3                0
+lugar4                0
+lugar5                0
+lugar6                0
+area1                 0
+area2                 0
+age                   0
+SQBescolari           0
+SQBage                0
+SQBhogar_total        0
+SQBedjefe             0
+SQBhogar_nin          0
+SQBovercrowding       0
+SQBdependency         0
+SQBmeaned             5
+agesq                 0
+Target                0
+Length: 143, dtype: int64train data shape:(9556, 143)extreme poverty: (755, 143)moderate poverty : (1597, 143)vulnerable households (1209, 143): non vulnerable households: (5995, 143)
