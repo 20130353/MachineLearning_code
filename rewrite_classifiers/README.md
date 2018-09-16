@@ -5,6 +5,7 @@ this repository offers some handwriting code of machine learning famous algorith
 - perception 
 - Logistic Rregression
 - SVM
+- Gaussian Nativebayes 
 
 - <b> test  </b>          
  test file is main test file, if you want to validate the effectiveness of the algorithm, you can run this it.           
