@@ -6,10 +6,8 @@
 
 
 import numpy as np
-import pylab
+import matplotlib.pyplot as plt
 from sklearn.datasets.samples_generator import make_regression
-
-
 
 # batch gradient desent
 # loss is 1/2m in order to simplify the calculation
@@ -30,8 +28,7 @@ def bgd(alpha, x, y, num_iter):
         gradient = np.dot(x_transpose, loss) / m # (y-w*x)*x]
         theta += alpha * gradient  # update w
 
-    pylab.plot(range(num_iter), J_list, "k-")
-    return theta
+    return theta,J_list
 
 
 def sgd(alpha, x, y, num_iter):
@@ -61,8 +58,7 @@ def sgd(alpha, x, y, num_iter):
         J_list.append(J)
         print("iter %s | J: %.3f" % (j, J))
 
-    pylab.plot(range(num_iter), J_list, color='coral',linestyle = '-')
-    return theta
+    return theta, J_list
 
 
 def mbgd(alpha, x, y, num_iter, minibatches):
@@ -91,8 +87,7 @@ def mbgd(alpha, x, y, num_iter, minibatches):
         J_list.append(J)
         print("iter %s | J: %.3f" % (j, J))
 
-    pylab.plot(range(num_iter), J_list, "y-")
-    return theta
+    return theta, J_list
 
 # based on the MBGD
 def momentum(alpha, x, y, num_iter, minibatches, momentum):
@@ -123,8 +118,7 @@ def momentum(alpha, x, y, num_iter, minibatches, momentum):
         J_list.append(J)
         print("iter %s | J: %.3f" % (j, J))
 
-    pylab.plot(range(num_iter), J_list, "b-")
-    return theta
+    return theta, J_list
 
 
 # based on the MBGD
@@ -159,8 +153,7 @@ def Nesterov(alpha, x, y, num_iter, minibatches, momentum):
         J_list.append(J)
         print("iter %s | J: %.3f" % (j, J))
 
-    pylab.plot(range(num_iter), J_list, color = 'hotpink', linestyle = '-')
-    return theta
+    return theta, J_list
 
 # based on the BGD
 def Adagrad(alpha, x, y, num_iter, gramma = 0.1):
@@ -183,12 +176,9 @@ def Adagrad(alpha, x, y, num_iter, gramma = 0.1):
         G += gradient
         theta += alpha/((G + gramma) ** 1/2) * gradient  # update w
 
+    return theta, J_list
 
-    pylab.plot(range(num_iter), J_list, color = 'darkviolet', linestyle = '-')
-
-    return theta
-
-def RMSprop(alpha, x, y, num_iter, beta=0.9,gramma = 0.1):
+def RMSprop(alpha, x, y, num_iter, gramma = 0.1):
 
     # update the w with the whole samples
     m, n = x.shape  # number of samples
@@ -208,94 +198,63 @@ def RMSprop(alpha, x, y, num_iter, beta=0.9,gramma = 0.1):
         G += gradient ** 2
         theta += alpha/np.sqrt((np.mean(G) + gramma)) * gradient  # update w
 
-
-    pylab.plot(range(num_iter), J_list, color = 'darksalmon', linestyle = '-')
-
-    return theta
+    return theta, J_list
 
 def Adadelta(alpha, x, y, num_iter, beta=0.9,gramma = 0.1):
     # not finished ...
-
-    # # update the w with the whole samples
-    # m, n = x.shape  # number of samples
-    # theta = np.ones(n)  # w
-    # J_list = []
-    # G = 0.0 # history gradient values
-    #
-    # x_transpose = x.transpose()
-    # for iter in range(0, num_iter):
-    #     hypothesis = np.dot(x, theta)  # inner product: w*x
-    #     loss = y - hypothesis  # whole loss of whole samples
-    #     J = np.sum(loss ** 2) / (2 * m)  # whole samples cost: sum[(yi-wi*xi)^2]/2m
-    #     J_list.append(J)
-    #     print("iter %s | J: %.3f" % (iter, J))
-    #
-    #     gradient = np.dot(x_transpose, loss) / m  # (y-w*x)*x]
-    #     G += gradient ** 2
-    #
-    #     gap_theta = alpha/np.sqrt((np.mean(G) + gramma)) * gradient
-    #     expected_theta = beta * np.mean(G) + (1-beta)* (gap_theta ** 2)
-    #     RMS_t = np.sqrt(expected_theta + gramma)
-    #
-    #     gap_theta = alpha / np.sqrt((np.mean(G[:,-1]) + gramma)) * gradient
-    #     expected_theta = beta * np.mean(G) + (1 - beta) * (gap_theta ** 2)
-    #     RMS_last = np.sqrt(expected_theta + gramma)
-    #
-    #     theta +=
-    #
-    #
-    # pylab.plot(range(num_iter), J_list, color = 'darksalmon', linestyle = ':')
 
     return
 
 
 if __name__ == '__main__':
 
-    x, y = make_regression(n_samples=100, n_features=2, n_informative=1,
+    max_iter = 1000
+    sample_size = 100
+    feature_size = 2
+
+    x, y = make_regression(n_samples=sample_size, n_features=feature_size, n_informative=1,
                            random_state=0, noise=35)
     m, n = np.shape(x)
     x = np.c_[np.ones(m), x]  # insert column, bias
     alpha = 0.01  # learning rate
 
-    pylab.plot(x[:, 1], y, 'r--')
+    # pylab.plot(x[:, 1], y, 'r--')
+    fig,ax = plt.subplots()
+
 
     print("\n#***BGD***#\n")
-    theta_bgd = bgd(alpha, x, y, 100)
-    # for i in range(x.shape[1]):
-    #     y_bgd_predict = theta_bgd * x
-    # pylab.plot(x, y_bgd_predict, 'k--')
+    theta_bgd,J_bgd = bgd(alpha, x, y, max_iter)
+    ax.plot(J_bgd,color='k',linestyle='-')
 
     print("\n#***SGD***#\n")
-    theta_sgd = sgd(alpha, x, y, 100)
-    # for i in range(x.shape[1]):
-    #     y_sgd_predict = theta_sgd * x
-    # pylab.plot(x, y_sgd_predict, color = 'coral',linestyle='--')
+    theta_sgd,J_sgd = sgd(alpha, x, y, max_iter)
+    ax.plot(J_sgd, color='red', linestyle='-')
 
     print("\n#***MBGD***#\n")
-    theta_mbgd = mbgd(alpha, x, y, 100, 10)
-    # for i in range(x.shape[1]):
-    #     y_mbgd_predict = theta_mbgd * x
-    # pylab.plot(x, y_mbgd_predict, 'y--')
-
+    theta_mbgd,J_mbgd = mbgd(alpha, x, y, max_iter, 10)
+    ax.plot(J_mbgd, color='darkgoldenrod', linestyle='-')
 
     print("\n#*** Momentum ***#\n")
-    theta_momentum = momentum(alpha, x, y, 100, 10, 0.9)
-    # for i in range(x.shape[1]):
-    #     y_momentum_predict = theta_momentum * x
-    # pylab.plot(x, y_momentum_predict, 'b--')
+    theta_momentum,J_momentum = momentum(alpha, x, y, max_iter, minibatches=10, momentum=0.9)
+    ax.plot(J_momentum, color='blue', linestyle='-')
 
     print("\n#*** Nesterov ***#\n")
-    theta_Nesterov = Nesterov(alpha, x, y, 100, 10, 0.9)
+    theta_Nesterov,J_nesterov = Nesterov(alpha, x, y, max_iter, minibatches=10, momentum=0.9)
+    ax.plot(J_nesterov, color='brown', linestyle='-')
+
 
     print("\n#*** Adagrad ***#\n")
-    theta_Adagrad = Adagrad(alpha, x, y, 100)
+    theta_Adagrad,J_adagrad = Adagrad(alpha, x, y, max_iter)
+    ax.plot(J_adagrad, color='fuchsia', linestyle='-',linewidth='3')
 
+    # RMS 和 Ada 颜色是混在一起的
     print("\n#***  RMSprop ***#\n")
-    theta_RMSprop =  RMSprop(alpha, x, y, 100)
+    theta_RMSprop,J_RMSprop =  RMSprop(alpha, x, y, max_iter)
+    ax.plot(J_RMSprop, color='green', linestyle='-',linewidth='2')
 
+    plt.legend(['BGD','SGD','MBGD','Momentum','Nesterov','Adagrad','RMSprop'])
 
-    pylab.legend(['BGD','SGD','MBGD','Momentum','Nesterov','Adagrad','RMSprop'])
-
-
-    pylab.show()
+    plt.savefig('maxiter-'+str(max_iter)+'-sample-'+str(sample_size)+'-feature-'+str(feature_size)+'.tif')
+    # plt.show()
     print("Done!")
+
