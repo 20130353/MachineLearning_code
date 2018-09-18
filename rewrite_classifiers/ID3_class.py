@@ -141,9 +141,11 @@ def createTree(dataSet, labels, data_full, labels_full):
     # one class
     if classList.count(classList[0]) == len(classList):
         return classList[0]
+
     # one dim
     if len(dataSet[0]) == 1:
         return majorityCnt(classList)
+
     # choose best feature
     bestFeat = chooseBestFeatureToSplit(dataSet, labels)
 
@@ -154,7 +156,7 @@ def createTree(dataSet, labels, data_full, labels_full):
     uniqueVals = set(featValues)
 
     if type(dataSet[0][bestFeat]).__name__ == 'str':
-        currentlabel = labels_full.index(labels[bestFeat])
+        currentlabel = labels_full.index(bestFeatLabel)
         featValuesFull = [example[currentlabel] for example in data_full]
         uniqueValsFull = set(featValuesFull)
     del (labels[bestFeat])
@@ -165,8 +167,8 @@ def createTree(dataSet, labels, data_full, labels_full):
         subLabels = labels[:]
         if type(dataSet[0][bestFeat]).__name__ == 'str':
             uniqueValsFull.remove(value)
-        myTree[bestFeatLabel][value] = createTree(splitDataSet \
-                                                      (dataSet, bestFeat, value), subLabels, data_full, labels_full)
+        myTree[bestFeatLabel][value] = createTree(splitDataSet(dataSet, bestFeat, value)\
+                                                  , subLabels, data_full, labels_full)
     if type(dataSet[0][bestFeat]).__name__ == 'str':
         for value in uniqueValsFull:
             myTree[bestFeatLabel][value] = majorityCnt(classList)
