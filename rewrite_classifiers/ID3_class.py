@@ -10,7 +10,7 @@ from numpy import *
 import pandas as pd
 from math import log
 
-# calculate the xiangnong entropy
+# calculate the shannon entropy
 def calcShannonEnt(dataSet):
     numEntries = len(dataSet)
     labelCounts = {}
@@ -23,7 +23,7 @@ def calcShannonEnt(dataSet):
         labelCounts[currentLabel] += 1
     shannonEnt = 0.0
 
-    # log2
+    # summation of each prob * log2(prob)
     for key in labelCounts:
         prob = float(labelCounts[key]) / numEntries
         shannonEnt -= prob * log(prob, 2)
