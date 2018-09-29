@@ -2,7 +2,7 @@
 # Author: sunmengxin
 # time: 18-9-19
 # file: ADAboost_class.py
-# description:
+# description: little test
 
 import numpy as np
 
