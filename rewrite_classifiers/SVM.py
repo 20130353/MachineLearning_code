@@ -131,7 +131,7 @@ if __name__ == '__main__':
 
     data = load_breast_cancer()
     x_train,x_test,y_train,y_test = train_test_split(data['data'],data['target'])
-    model = SVM(max_iter=100,kernel='linear',C=1)
+    model = SVM(max_iter=100,kernel='gauss',C=1)
     model.fit(x_train, y_train)
     y_pred = model.predict(x_test)
     accuracy = accuracy_score(y_test, y_pred)

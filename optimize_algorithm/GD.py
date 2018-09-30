@@ -38,7 +38,7 @@ def sgd(alpha, x, y, num_iter):
     theta = np.ones(n) # w
     J_list = []
 
-    # 随机化序列
+    # 随机化序列,select some samples!!!
     idx = np.random.permutation(y.shape[0])
     x, y = x[idx], y[idx]
 

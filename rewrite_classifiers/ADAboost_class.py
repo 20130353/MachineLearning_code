@@ -22,7 +22,7 @@ def stumpClassify(dataMatrix,dimen,thresholdValue,thresholdIneq):
     功能：输出决策树桩标签
     输出：标签
     '''
-    returnArray =  np.ones((np.shape(dataMatrix)[0],1))
+    returnArray = np.ones((np.shape(dataMatrix)[0],1))
     if thresholdIneq == 'lt':
         returnArray[dataMatrix[:,dimen] <= thresholdValue] = -1
     else:
