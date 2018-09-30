@@ -3,15 +3,18 @@ this repository offers some handwriting code of machine learning famous algorith
 
 ## Contains
 - perception 
-- Logistic Rregression
-- SVM
 - Gaussian Nativebayes 
+- LogisticRregression
+- SVM (with SVM model file and kernels file)
+- ID3
+- CART decision tree
+- ADAboost
+- Gradient Boosting Decision tree
 
-- <b> test  </b>          
- test file is main test file, if you want to validate the effectiveness of the algorithm, you can run this it.           
-- data
-  data.txt file is basic data file, it includes two classes (labeled as +1/0)
-
+## data
+  data is download from the scikit-learn.datasets package
+  data name is breast cancer datset
+  
 
  
 
