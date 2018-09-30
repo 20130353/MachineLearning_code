@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Author: sunmengxin
 # time: 18-9-14
-# file: LR_class.py
+# file: LogisticRegression.py
 # description:
 
 # QA: why some people use the cross_entropy*prod to update w value
