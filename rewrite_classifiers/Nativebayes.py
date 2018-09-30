@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 # Author: sunmengxin
 # time: 18-9-16
-# file: Nativebayes_class.py
+# file: Nativebayes.py
 # description:this file is model about the nativebayes with Gaussian distribution
 
 import numpy as np
 from math import sqrt
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 
-class Nativebayes_class:
+class Nativebayes:
 
     def __init__(self):
         self.pre_prob = []
@@ -18,8 +21,9 @@ class Nativebayes_class:
         self.alpha = 1
 
     def pre_problity(self):
+        # alpha is to avoid result is zero
         pos_prob = 1.0 * (np.sum(self.y == 1.0) + self.alpha) / (self.N + self.alpha)
-        neg_prob = 1.0 * (np.sum(self.y == 0.0) + 1) / (self.N + self.alpha)
+        neg_prob = 1.0 * (np.sum(self.y == 0.0) + self.alpha) / (self.N + self.alpha)
         return [pos_prob, neg_prob]
 
     def fit(self,x,y):
@@ -70,3 +74,13 @@ class Nativebayes_class:
                 res.append(0)
 
         return res
+
+if __name__ == '__main__':
+    data = load_breast_cancer()
+    x_train, x_test, y_train, y_test = train_test_split(data['data'], data['target'])
+
+    model = Nativebayes()
+    model.fit(x_train, y_train)
+    y_pred = model.predict(x_test)
+    accuracy = accuracy_score(y_test, y_pred)
+    print ('accuracy %f' % accuracy)
