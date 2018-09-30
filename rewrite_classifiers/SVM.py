@@ -2,7 +2,7 @@
 # Author: sunmengxin
 # time: 9/30/18
 # file: SVM.py
-# description:
+# description: init version for SVM classifier and accuracy is 0.34, maybe there is something wrong!
 
 from sklearn.metrics import accuracy_score
 from sklearn.datasets import load_breast_cancer
@@ -84,27 +84,29 @@ class SVM():
         self.K = np.zeros((self.N,self.N))
 
         for i in range(self.N):
-            self.K[:, i] = self._kernel(self.x, self.x[i, :])  # 每一行数据的特征通过核函数转化 n->m
+            self.K[:, i] = self._kernel(self.x, self.x[i, :])  #innerj-product kernel values
 
         for _ in range(self.max_iter):
             alpha_prev = np.copy(self.alpha)
-            for j in range(self.N):
+
+            for j in range(self.N): # calculate alpha_i and alpha_j, fix the alpha_i
+
                 i = self._rand_index(j)
                 E_i,E_j = self._cal_error(x[i],y[i]), self._cal_error(x[j],y[j])
 
                 # judge whethe statisfy the KTT condition
                 if (self.y[j] * E_j < -0.001 and self.alpha[j] < self.C) or (self.y[j] * E_j > 0.001 and self.alpha[j] > 0):
+
                     # update w
                     L, H = self.getBounds(i, j)
                     eta = 2.0 * self.K[i, j] - self.K[i, i] - self.K[j, j] # step length
                     if eta == 0: # step length is 0 and stop the process
                         continue
-
                     alpha_j_old,alpha_i_old = self.alpha[j],self.alpha[i]
                     self.alpha[j] -= (self.y[j] * (E_i - E_j))/ eta  # alpha_2_new = alpha_2_old - y2(e1-e2)/eta
                     self.alpha[j] = min(H,self.alpha[j]) if self.alpha[j] > L else max(L,self.alpha[j]) # check alpha_j is in [L,H]
 
-                    self.alpha[i] = alpha_i_old + (self.y[i] * self.y[j]) * (alpha_j_old - self.alpha[i]) # alpha_1_new
+                    self.alpha[i] = alpha_i_old + (self.y[i] * self.y[j]) * (alpha_j_old - self.alpha[i]) # alpha_1_new = alpha_1_old + y1y2(alpha_2_old-alpha_1_old)
 
                     # update b
                     b1 = self.b - E_i - self.y[i] * (self.alpha[i] - alpha_j_old) * self.K[i, i] - \
