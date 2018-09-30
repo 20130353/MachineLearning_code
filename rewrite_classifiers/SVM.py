@@ -11,6 +11,8 @@ import numpy as np
 import math
 from kernels import *
 
+# reference link : https://blog.csdn.net/v_july_v/article/details/7624837
+
 
 class SVM():
 
