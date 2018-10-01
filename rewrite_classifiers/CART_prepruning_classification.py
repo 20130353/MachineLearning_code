@@ -5,6 +5,7 @@
 # description: CART classification decision tree, it can solve continuous features,missing value
 # note that: CART is binary decision tree
 # missing value : majority class label is used to make up the missing value
+# the file implemented the pre-pruning
 
 import numpy as np
 import math
@@ -155,7 +156,17 @@ class CART_classification():
                     y_sub_t.append(y_sub)
                 Node[feature_best['feature_name'] + '不是' + feature_best['values'][0]] = self._build_tree(x_sub, y_sub, label)
 
-        return Node
+        # pre-pruning
+        self.dict = Node
+        y_pred_extension = self.predict(x)
+        label_inx, voting_count = self._major_voting(x, y)
+        y_pred_nonextension = [1 if np.unique(self.y)[label_inx] == each else 0 for each in y]
+
+        # if accuracy rate lower than that of non-spliting tree, return majority label
+        if accuracy_score(y, y_pred_extension) > sum(y_pred_nonextension)/float(len(y)):
+            return np.unique(self.y)[label_inx]
+        else:
+            return Node
 
     def fit(self,x,y,label):
         self.x = np.array(x)
@@ -196,9 +207,8 @@ class CART_classification():
 
     def predict(self,x):
         res = []
-        x = x.reset_index(drop=True)
-        for inx in range(len(x)):
-            y_pred = self._decode_dict(x.loc[inx],copy.deepcopy(self.dict))
+        for each in x:
+            y_pred = self._decode_dict(each,copy.deepcopy(self.dict))
             res.append(y_pred)
         return res
 
@@ -211,7 +221,7 @@ if __name__ == '__main__':
     model = CART_classification()
     model.fit(x_train, y_train,label=list(data.columns))
     # print(model.dict)
-    y_pred = model.predict(x_test)
+    y_pred = model.predict(np.array(x_test))
     # print(y_test)
     # print(y_pred)
     accuracy = accuracy_score(y_test, y_pred)
