@@ -1,0 +1,129 @@
+
+#####################  2018.10.2 18:44 data dection ########################
+shape is  (1460, 81)
+desciption is
+                 Id   MSSubClass      ...             YrSold      SalePrice
+count  1460.000000  1460.000000      ...        1460.000000    1460.000000
+mean    730.500000    56.897260      ...        2007.815753  180921.195890
+std     421.610009    42.300571      ...           1.328095   79442.502883
+min       1.000000    20.000000      ...        2006.000000   34900.000000
+25%     365.750000    20.000000      ...        2007.000000  129975.000000
+50%     730.500000    50.000000      ...        2008.000000  163000.000000
+75%    1095.250000    70.000000      ...        2009.000000  214000.000000
+max    1460.000000   190.000000      ...        2010.000000  755000.000000
+[8 rows x 38 columns]
+
+missing columns number is 19
+missing ratio is  0.2375
+
+type count are
+    object     43
+    int64      35
+    float64     3
+max min (755000, 34900)
+
+总数        1460
+最小值      34900
+25%分位数   129975
+中位数      163000
+75%分位数   214000
+最大值      755000
+均值        180921
+标准差      208500\n1 ...
+最小值位置   495
+最大值位置   691
+
+fillna with train_df mean value
+
+desciption is
+                 Id   MSSubClass      ...             YrSold      SalePrice
+count  1460.000000  1460.000000      ...        1460.000000    1460.000000
+mean    730.500000    56.897260      ...        2007.815753  180921.195890
+std     421.610009    42.300571      ...           1.328095   79442.502883
+min       1.000000    20.000000      ...        2006.000000   34900.000000
+25%     365.750000    20.000000      ...        2007.000000  129975.000000
+50%     730.500000    50.000000      ...        2008.000000  163000.000000
+75%    1095.250000    70.000000      ...        2009.000000  214000.000000
+max    1460.000000   190.000000      ...        2010.000000  755000.000000
+[8 rows x 38 columns]
+
+
+#####################  2018.10.2 19.32  xgb default parameters ########################
+train columns Index(['index', 'Id', 'MSSubClass', 'LotFrontage', 'LotArea', 'OverallQual',
+       'OverallCond', 'YearBuilt', 'YearRemodAdd', 'MasVnrArea',
+       ...
+       'SaleType_ConLw', 'SaleType_New', 'SaleType_Oth', 'SaleType_WD',
+       'SaleCondition_Abnorml', 'SaleCondition_AdjLand',
+       'SaleCondition_Alloca', 'SaleCondition_Family', 'SaleCondition_Normal',
+       'SaleCondition_Partial'],
+      dtype='object', length=290)
+len  290
+test columns Index(['index', 'Id', 'MSSubClass', 'LotFrontage', 'LotArea', 'OverallQual',
+       'OverallCond', 'YearBuilt', 'YearRemodAdd', 'MasVnrArea',
+       ...
+       'SaleType_ConLw', 'SaleType_New', 'SaleType_Oth', 'SaleType_WD',
+       'SaleCondition_Abnorml', 'SaleCondition_AdjLand',
+       'SaleCondition_Alloca', 'SaleCondition_Family', 'SaleCondition_Normal',
+       'SaleCondition_Partial'],
+      dtype='object', length=290)
+len  290
+train data len 1460
+train label len 1460
+0.8717024110209391
+
+#####################  2018.10.2 19.32  adjust XGB parameters ########################
+from sklearn import cross_validation
+from sklearn.grid_search import GridSearchCV
+model = xgb.XGBRegressor(base_score=0.5,
+                         colsample_bylevel=1,
+                         colsample_bytree=1,
+                         gamma=0,
+                         learning_rate=0.1,
+                         max_delta_step=0,
+                         max_depth=3,
+                         min_child_weight=1,
+                         missing=None,
+                         n_estimators=100,
+                         nthread=1,
+                         objective='reg:linear',
+                         reg_alpha=0,
+                         reg_lambda=1,
+                         scale_pos_weight=1,
+                         seed=1850,
+                         silent=True,
+                         subsample=1)
+model.fit(train_data, train_label)
+y_pred = model.predict(val_data)
+print(r2_score(val_label, y_pred))
+---res---
+0.8372071108203809
+
+
+#####################  2018.10.2 19.48  gridsearchcv XGB parameters ########################
+param_test = {'max_depth':list(range(3,10,2)),'min_child_weight':list(range(1,6,2))}
+gssearch = GridSearchCV(estimator=xgb.XGBRegressor(base_score=0.5,
+                         colsample_bylevel=1,
+                         colsample_bytree=1,
+                         gamma=0,
+                         learning_rate=0.1,
+                         max_delta_step=0,
+                         missing=None,
+                         n_estimators=100,
+                         nthread=1,
+                         objective='reg:linear',
+                         reg_alpha=0,
+                         reg_lambda=1,
+                         scale_pos_weight=1,
+                         seed=1850,
+                         silent=True,
+                         subsample=1),
+                         param_grid=param_test,scoring='r2',cv=5)
+gssearch.fit(train_data, train_label)
+print('gssearch.grid_scores_',gssearch.grid_scores_)
+print('gssearch.best_params_',gssearch.best_params_)
+print('gssearch.best_score_',gssearch.best_score_)
+---res---
+gssearch.grid_scores_ [mean: 0.85221, std: 0.05978, params: {'max_depth': 3, 'min_child_weight': 1}, mean: 0.86679, std: 0.05706, params: {'max_depth': 3, 'min_child_weight': 3}, mean: 0.85972, std: 0.07165, params: {'max_depth': 3, 'min_child_weight': 5}, mean: 0.84625, std: 0.06188, params: {'max_depth': 5, 'min_child_weight': 1}, mean: 0.85500, std: 0.07163, params: {'max_depth': 5, 'min_child_weight': 3}, mean: 0.83852, std: 0.08475, params: {'max_depth': 5, 'min_child_weight': 5}, mean: 0.84688, std: 0.05922, params: {'max_depth': 7, 'min_child_weight': 1}, mean: 0.85393, std: 0.06042, params: {'max_depth': 7, 'min_child_weight': 3}, mean: 0.83749, std: 0.09129, params: {'max_depth': 7, 'min_child_weight': 5}, mean: 0.84134, std: 0.05306, params: {'max_depth': 9, 'min_child_weight': 1}, mean: 0.84910, std: 0.06718, params: {'max_depth': 9, 'min_child_weight': 3}, mean: 0.83475, std: 0.08748, params: {'max_depth': 9, 'min_child_weight': 5}]
+gssearch.best_params_ {'max_depth': 3, 'min_child_weight': 3}
+gssearch.best_score_ 0.8667896494928011
+
