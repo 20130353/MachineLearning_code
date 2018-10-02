@@ -7,13 +7,14 @@ this repository offers some handwriting code of machine learning famous algorith
 - LogisticRregression
 - SVM (with SVM model file and kernels file)
 - ID3
-- CART decision tree
+- C4.5
+- CART
 - ADAboost
 - Gradient Boosting Decision tree
 
 ## data
-  data is download from the scikit-learn.datasets package
-  data name is breast cancer datset
+  data 1: breast cancer datset, which comes from the scikit-learn.datasets package           
+  data 2: xigua data.csv, which is download from google.
   
 
  
