@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Author: sunmengxin
 # time: 10/1/18
-# file: C4.5.py
+# file: C4.5_prepruning.py
 # description: decision tree with mutual information ratio
 
 # note that:
@@ -145,17 +145,17 @@ class C45():
                 Node[each] = self._build_tree(x_sub, y_sub, label)
         return Node
 
-        # # pre-pruning
-        # self.dict = Node
-        # y_pred_extension = self.predict(x)
-        # label_inx, voting_count = self._major_voting(x, y)
-        # y_pred_nonextension = [1 if np.unique(self.y)[label_inx] == each else 0 for each in y]
-        #
-        # # if accuracy rate lower than that of non-spliting tree, return majority label
-        # if accuracy_score(y, y_pred_extension) > sum(y_pred_nonextension)/float(len(y)):
-        #     return np.unique(self.y)[label_inx]
-        # else:
-        #     return Node
+        # pre-pruning
+        self.dict = Node
+        y_pred_extension = self.predict(x)
+        label_inx, voting_count = self._major_voting(x, y)
+        y_pred_nonextension = [1 if np.unique(self.y)[label_inx] == each else 0 for each in y]
+
+        # if accuracy rate lower than that of non-spliting tree, return majority label
+        if accuracy_score(y, y_pred_extension) > sum(y_pred_nonextension)/float(len(y)):
+            return np.unique(self.y)[label_inx]
+        else:
+            return Node
 
     def fit(self,x,y,label):
         self.x = np.array(x)
