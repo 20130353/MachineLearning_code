@@ -123,8 +123,6 @@ class ID3():
         return res
 
 
-
-
 if __name__ == '__main__':
 
     data = pd.read_csv('xigua_data.csv').ix[1:,1:]
