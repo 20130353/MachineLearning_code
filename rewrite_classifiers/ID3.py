@@ -3,9 +3,8 @@
 # time: 9/30/18
 # file: ID3.py
 # description: decision tree with mutual information index
-# ID3 only can handle with the discrete data
-# it cannot handle with the continuous data, missing data
-# controlling of tree depth, left node number is offered!!!
+# function of ID3
+# 1. handle with the discrete data
 
 import numpy as np
 import math

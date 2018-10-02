@@ -1,14 +1,19 @@
 # -*- coding: utf-8 -*-
 # Author: sunmengxin
 # time: 10/1/18
-# file: C4.5_prepruning.py
+# file: C4.5.py
 # description: decision tree with mutual information ratio
+# function of C4.5:
+# 1. handle with discrete data and continuous data
+# 2. handle with missing value
+# 3. offer pruning
+
 
 # note that:
-# 1. missing value : majority class label is used to make up the missing value (The way to handle with the missing value is official advice.
-#    In fact, offciers adcovate to discard the features contraining missing values)
-# 2. regression utilize the MSE error to evaluate the rent point
-# 3. the file implemented the pre-pruning (the official C4.5 apply the poss-pruning method)
+# 1. solution to regression: threshold of continuous, minimize the MSE error of samples to threshold
+# 2. solution to missing value: discard the features contraining missing values)
+# 3. solution to pruning: pre-pruning (the official C4.5 apply the poss-pruning method)
+# post-pruning reference link : https://www.cnblogs.com/allenren/p/8662504.html
 
 
 import numpy as np
@@ -46,7 +51,6 @@ class C45():
         for inx, each in enumerate(x):
 
             try:
-
                 if dir == '<=' and each[current_feature_inx] <= feature_value:
 
                     sample = np.append(each[:current_feature_inx], each[current_feature_inx + 1:])
@@ -83,12 +87,30 @@ class C45():
         labels_cnt = [sum(y==each) for each in labels]
         return labels[np.argmax(labels_cnt)],max(labels_cnt)
 
+    def _is_contain_missing(self,x):
+        if type(x[0]).__name__ == 'str':
+            for each in x:
+                if each == '':
+                    return True
+            return False
+        else:
+            for each in x:
+                if each == math.inf:
+                    return True
+            return False
+
+
     def _choose_best_feature(self,x,y,label):
         N,dims = x.shape
         entropy_base = self._cal_mutual_infomation(x, y)
 
         feature_best = {'feature_name': '', 'gain': 0.0, 'values': [], 'feature_inx': 0}
         for dim in range(dims):
+
+            # missing value
+            if self._is_contain_missing(x[:,dim]):
+                continue
+
             feature_values = x[:,dim]
             feature_unique = np.unique(feature_values)
             if type(feature_unique[0]).__name__ != 'str': #continuous type
@@ -165,7 +187,7 @@ class C45():
         for child in dict_copy.keys():
             if type(test_value).__name__ != str and (child.find('<=') != -1 or child.find('>') != -1):#test feature value and child value are continuous types
                 if (child.find('<=') != -1 and test_value <= np.float(child.split('<=')[1])) \
-                        or (child.find('>') == -1 and test_value > np.float(child.split('<=')[1])):
+                        or (child.find('>') != -1 and test_value > np.float(child.split('>')[1])):
                     if type(dict_copy[child]).__name__ == 'dict':
                         y_pred = self._decode_dict(x, dict_copy[child])
                     else:
@@ -181,7 +203,6 @@ class C45():
 
 
     def predict(self,x):
-
         return [self._decode_dict(each, copy.deepcopy(self.dict)) for each in x]
 
 
@@ -192,7 +213,7 @@ if __name__ == '__main__':
     x_train,x_test,y_train,y_test = train_test_split(data.ix[:,:-1],data['好瓜'])
 
     model = C45()
-    model.fit(x_train, y_train,label=list(data.columns))
+    model.fit(x_train, y_train,label=list(data.columns)[:-1])
     print('dict')
     print(model.dict)
     y_pred = model.predict(np.array(x_test))
