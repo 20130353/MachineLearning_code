@@ -19,8 +19,10 @@ import pandas as pd
 import copy
 
 class C45():
-    def __init__(self):
+    def __init__(self,max_deepth=10,min_leaf_sample=10):
         self.dict = None
+        self.max_deepth = max_deepth
+        self.min_leaf_sample = min_leaf_sample
 
     def _cal_mutual_infomation(self, x, y):
         x = np.array(x)
@@ -78,8 +80,8 @@ class C45():
 
     def _major_voting(self,x,y):
         labels = np.unique(y)
-        labels_cnt = [len(y==each) for each in labels]
-        return np.argmax(labels_cnt),max(labels_cnt)
+        labels_cnt = [sum(y==each) for each in labels]
+        return labels[np.argmax(labels_cnt)],max(labels_cnt)
 
     def _choose_best_feature(self,x,y,label):
         N,dims = x.shape
@@ -114,7 +116,7 @@ class C45():
         return feature_best
 
 
-    def _build_tree(self,x,y,label):
+    def _build_tree(self,x,y,label,deepth):
         x = np.array(x)
         y = np.array(y)
         N, dims = x.shape
@@ -124,51 +126,42 @@ class C45():
             return y[0]
 
         if dims == 1:
-            return self._major_voting(x, y)  # one dimension
+            label, _ = self._major_voting(x, y)  # one dimension
+            return label
+
+        # prepruning
+        if len(y) < self.min_leaf_sample or deepth == self.max_deepth:
+            label, _ = self._major_voting(x, y)  # one dimension
+            return label
 
         feature_best = self._choose_best_feature(x, y,label)
-
         Node = {'feature_name': feature_best['feature_name']}
         if type(x[0,feature_best['feature_inx']]).__name__ != 'str':# continuous type
             x_1, y_1 = self._split_continuous_data(x, y, feature_best['feature_inx'], feature_best['values'], '<=')
             x_2, y_2 = self._split_continuous_data(x, y, feature_best['feature_inx'], feature_best['values'], '>')
             copy.deepcopy(label).remove(feature_best['feature_name'])#remove selected feature from label set
-            Node[feature_best['feature_name'] + '<=' + str(feature_best['values'])] = self._build_tree(x_1, y_1, label)
-            Node[feature_best['feature_name'] + '>' + str(feature_best['values'])] = self._build_tree(x_2, y_2, label)
-
+            Node[feature_best['feature_name'] + '<=' + str(feature_best['values'])] = self._build_tree(x_1, y_1, label, deepth+1)
+            Node[feature_best['feature_name'] + '>' + str(feature_best['values'])] = self._build_tree(x_2, y_2, label, deepth+1)
         else:
             feature_best = self._choose_best_feature(x, y, label)
             Node = {'feature_name': feature_best['feature_name']}
             for inx, each in enumerate(feature_best['values']):
                 x_sub, y_sub = self._split_discrete_data(x, y, feature_best['feature_inx'], each)
                 copy.deepcopy(label).remove(feature_best['feature_name'])
-                Node[each] = self._build_tree(x_sub, y_sub, label)
+                Node[each] = self._build_tree(x_sub, y_sub, label, deepth+1)
         return Node
-
-        # pre-pruning
-        self.dict = Node
-        y_pred_extension = self.predict(x)
-        label_inx, voting_count = self._major_voting(x, y)
-        y_pred_nonextension = [1 if np.unique(self.y)[label_inx] == each else 0 for each in y]
-
-        # if accuracy rate lower than that of non-spliting tree, return majority label
-        if accuracy_score(y, y_pred_extension) > sum(y_pred_nonextension)/float(len(y)):
-            return np.unique(self.y)[label_inx]
-        else:
-            return Node
 
     def fit(self,x,y,label):
         self.x = np.array(x)
         self.y = np.array(y)
         self.label = np.array(label)
-        self.dict = self._build_tree(x,y,label)
+        self.dict = self._build_tree(x,y,label,deepth=1)
 
     def _decode_dict(self,x,dict_copy):
         # take the root feature value
         root_feat_name = dict_copy['feature_name']
         test_value = x[list(self.label).index(root_feat_name)]
 
-        y_pred = ''
         for child in dict_copy.keys():
             if type(test_value).__name__ != str and (child.find('<=') != -1 or child.find('>') != -1):#test feature value and child value are continuous types
                 if (child.find('<=') != -1 and test_value <= np.float(child.split('<=')[1])) \
@@ -184,21 +177,12 @@ class C45():
                         y_pred = self._decode_dict(x, dict_copy[child])
                     else:
                         y_pred = dict_copy[child]
-
-        if y_pred == '':
-            label_inx,voting_count = self._major_voting(self.x,self.y)
-            label_unique = np.unique(self.y)
-            y_pred = label_unique[label_inx]
-
         return y_pred
 
 
     def predict(self,x):
-        res = []
-        for each in x:
-            y_pred = self._decode_dict(each,copy.deepcopy(self.dict))
-            res.append(y_pred)
-        return res
+
+        return [self._decode_dict(each, copy.deepcopy(self.dict)) for each in x]
 
 
 if __name__ == '__main__':
@@ -209,9 +193,12 @@ if __name__ == '__main__':
 
     model = C45()
     model.fit(x_train, y_train,label=list(data.columns))
-    # print(model.dict)
+    print('dict')
+    print(model.dict)
     y_pred = model.predict(np.array(x_test))
+    # print('y_true')
     # print(y_test)
+    # print('y_pred')
     # print(y_pred)
     accuracy = accuracy_score(y_test, y_pred)
     print ('accuracy %f' % accuracy)
