@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
 # Author: sunmengxin
-# time: 9/30/18
-# file: ID3.py
+# time: 10/1/18
+# file: C4.5.py
 # description: decision tree with mutual information ratio
+
+# note that:
+# 1. missing value : majority class label is used to make up the missing value (The way to handle with the missing value is official advice.
+#    In fact, offciers adcovate to discard the features contraining missing values)
+# 2. regression utilize the MSE error to evaluate the rent point
+# 3. the file implemented the pre-pruning (the official C4.5 apply the poss-pruning method)
+
 
 import numpy as np
 import math
-from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import pandas as pd
@@ -16,7 +22,7 @@ class C45():
     def __init__(self):
         self.dict = None
 
-    def _cal_mutual_infomation(self,x,y):
+    def _cal_mutual_infomation(self, x, y):
         x = np.array(x)
         y = np.array(y)
         N = np.shape(x)[0]
@@ -24,13 +30,43 @@ class C45():
         labels = np.unique(y)
         mutual_info = 0.0
         for each in labels:
-            cnt = len(y[y==each])
-            prob = cnt/float(N)
-            mutual_info += -prob * math.log(prob,2)
+            cnt = len(y[y == each])
+            prob = cnt / float(N)
+            mutual_info += -prob * math.log(prob, 2)
         return mutual_info
 
+    # split data according to the feature_value
+    # when dir is '<=', select sample with lower feature values than feature_value
+    # when dir is '>', select sample with bigger feature values than feature_value
+    def _split_continuous_data(self,x,y,current_feature_inx,feature_value,dir):
+        selected_x = []
+        selected_y = []
+        for inx, each in enumerate(x):
+
+            try:
+
+                if dir == '<=' and each[current_feature_inx] <= feature_value:
+
+                    sample = np.append(each[:current_feature_inx], each[current_feature_inx + 1:])
+                    selected_x.append(sample)
+                    selected_y.append(y[inx])
+
+                if dir == '>' and each[current_feature_inx] >= feature_value:
+                    sample = np.append(each[:current_feature_inx], each[current_feature_inx + 1:])
+                    selected_x.append(sample)
+                    selected_y.append(y[inx])
+            except Exception:
+                print('Error:')
+                print('inx,each:')
+                print(inx,each)
+                print('\neach[current_feature_inx]')
+                print(each[current_feature_inx])
+                print('\nfeature_value')
+                print(feature_value)
+        return selected_x, selected_y
+
     # take all samplesf with selected discrete feature
-    def _split_data(self, x, y, label, current_feature_inx, feature_value):
+    def _split_discrete_data(self, x, y, current_feature_inx, feature_value):
         selected_x = []
         selected_y = []
         for inx,each in enumerate(x):
@@ -47,24 +83,35 @@ class C45():
 
     def _choose_best_feature(self,x,y,label):
         N,dims = x.shape
-        entropy_base = self._cal_mutual_infomation(x,y)
-        gain_best = {'feature_name':'','gain':0.0,'values':[],'feature_inx':0}
+        entropy_base = self._cal_mutual_infomation(x, y)
+
+        feature_best = {'feature_name': '', 'gain': 0.0, 'values': [], 'feature_inx': 0}
         for dim in range(dims):
             feature_values = x[:,dim]
             feature_unique = np.unique(feature_values)
+            if type(feature_unique[0]).__name__ != 'str': #continuous type
+                feature_best = {'feature_name': '', 'gain': math.inf, 'values': [], 'feature_inx': 0}
+                feature_unique = sorted(feature_unique)
+                split_points = [(feature_unique[inx] + feature_unique[inx+1])/2 for inx in range(len(feature_unique)-1)]
+                for inx,each in enumerate(split_points):
+                    reg_error = sum([(x_i[dim]-each)** 2 if x_i[dim] <= each else 0 for x_i in x]) \
+                                + sum([(x_i[dim]-each)** 2 if x_i[dim] > each else 0 for x_i in x])
+                    if (reg_error < feature_best['gain']) or (feature_best['gain'] == 0.0):
+                        feature_best = {'feature_name': label[dim], 'gain': reg_error, 'values': each,'feature_inx': dim}
 
-            entropy_sub = 0.0
-            for inx,each in enumerate(feature_unique):
-                x_sub,y_sub = self._split_data(x,y,label,inx,each)
-                prob = len(x_sub)/float(N)
-                entropy_sub += prob * self._cal_mutual_infomation(x_sub,y_sub)
-            if entropy_sub != 0:
-                gain = (entropy_base - entropy_sub)/entropy_sub
-            else:
-                gain = (entropy_base - entropy_sub)
-            if gain > gain_best['gain']:
-                gain_best = {'feature_name': label[dim], 'gain': gain, 'values': feature_unique,'feature_inx':dim}
-        return gain_best
+            else: #discrete type
+                entropy_sub = 0.0
+                for inx,each in enumerate(feature_unique):
+                    x_sub,y_sub = self._split_discrete_data(x, y, dim, each)
+                    prob = len(x_sub)/float(N)
+                    entropy_sub += prob * self._cal_mutual_infomation(x_sub, y_sub)
+                try:
+                    gain = (entropy_base - entropy_sub)/entropy_sub
+                except Exception:
+                    gain = (entropy_base - entropy_sub)
+                if gain > feature_best['gain']:
+                    feature_best = {'feature_name': label[dim], 'gain': gain, 'values': feature_unique,'feature_inx':dim}
+        return feature_best
 
 
     def _build_tree(self,x,y,label):
@@ -80,15 +127,36 @@ class C45():
             return self._major_voting(x, y)  # one dimension
 
         feature_best = self._choose_best_feature(x, y,label)
+
         Node = {'feature_name': feature_best['feature_name']}
-        for inx, each in enumerate(feature_best['values']):
-            x_sub, y_sub = self._split_data(x, y,label, feature_best['feature_inx'], each)
-            copy.deepcopy(label).remove(feature_best['feature_name'])
-            Node[each] = self._build_tree(x_sub, y_sub,label)
+        if type(x[0,feature_best['feature_inx']]).__name__ != 'str':# continuous type
+            x_1, y_1 = self._split_continuous_data(x, y, feature_best['feature_inx'], feature_best['values'], '<=')
+            x_2, y_2 = self._split_continuous_data(x, y, feature_best['feature_inx'], feature_best['values'], '>')
+            copy.deepcopy(label).remove(feature_best['feature_name'])#remove selected feature from label set
+            Node[feature_best['feature_name'] + '<=' + str(feature_best['values'])] = self._build_tree(x_1, y_1, label)
+            Node[feature_best['feature_name'] + '>' + str(feature_best['values'])] = self._build_tree(x_2, y_2, label)
+
+        else:
+            feature_best = self._choose_best_feature(x, y, label)
+            Node = {'feature_name': feature_best['feature_name']}
+            for inx, each in enumerate(feature_best['values']):
+                x_sub, y_sub = self._split_discrete_data(x, y, feature_best['feature_inx'], each)
+                copy.deepcopy(label).remove(feature_best['feature_name'])
+                Node[each] = self._build_tree(x_sub, y_sub, label)
         return Node
 
-    # build_tree process and fit process cannot be merged, because the build_tree is interation process and it returns tree node.
-    # and fit process needs to set model dict, it return nothing
+        # # pre-pruning
+        # self.dict = Node
+        # y_pred_extension = self.predict(x)
+        # label_inx, voting_count = self._major_voting(x, y)
+        # y_pred_nonextension = [1 if np.unique(self.y)[label_inx] == each else 0 for each in y]
+        #
+        # # if accuracy rate lower than that of non-spliting tree, return majority label
+        # if accuracy_score(y, y_pred_extension) > sum(y_pred_nonextension)/float(len(y)):
+        #     return np.unique(self.y)[label_inx]
+        # else:
+        #     return Node
+
     def fit(self,x,y,label):
         self.x = np.array(x)
         self.y = np.array(y)
@@ -102,38 +170,48 @@ class C45():
 
         y_pred = ''
         for child in dict_copy.keys():
-            if test_value == child:
-                # if type is dict, it is still a subtree.
-                if type(dict_copy[child]).__name__ == 'dict':
-                    y_pred = self._decode_dict(x,dict_copy[child])
-                else:  # it is class label
-                    y_pred = dict_copy[child]
+            if type(test_value).__name__ != str and (child.find('<=') != -1 or child.find('>') != -1):#test feature value and child value are continuous types
+                if (child.find('<=') != -1 and test_value <= np.float(child.split('<=')[1])) \
+                        or (child.find('>') == -1 and test_value > np.float(child.split('<=')[1])):
+                    if type(dict_copy[child]).__name__ == 'dict':
+                        y_pred = self._decode_dict(x, dict_copy[child])
+                    else:
+                        y_pred = dict_copy[child]
+
+            else:
+                if child.find(root_feat_name) >=0 : # same feature
+                    if type(dict_copy[child]).__name__ == 'dict':
+                        y_pred = self._decode_dict(x, dict_copy[child])
+                    else:
+                        y_pred = dict_copy[child]
+
+        if y_pred == '':
+            label_inx,voting_count = self._major_voting(self.x,self.y)
+            label_unique = np.unique(self.y)
+            y_pred = label_unique[label_inx]
 
         return y_pred
 
 
     def predict(self,x):
         res = []
-        x = x.reset_index(drop=True)
-        for inx in range(len(x)):
-            y_pred = self._decode_dict(x.loc[inx],copy.deepcopy(self.dict))
+        for each in x:
+            y_pred = self._decode_dict(each,copy.deepcopy(self.dict))
             res.append(y_pred)
         return res
-
-
 
 
 if __name__ == '__main__':
 
     data = pd.read_csv('xigua_data.csv').ix[1:,1:]
 
-    x_train,x_test,y_train,y_test = train_test_split(data.ix[:,:-3],data['好瓜'])
+    x_train,x_test,y_train,y_test = train_test_split(data.ix[:,:-1],data['好瓜'])
+
     model = C45()
     model.fit(x_train, y_train,label=list(data.columns))
-    print(model.dict)
-
-    y_pred = model.predict(x_test)
-    print(y_test)
-    print(y_pred)
+    # print(model.dict)
+    y_pred = model.predict(np.array(x_test))
+    # print(y_test)
+    # print(y_pred)
     accuracy = accuracy_score(y_test, y_pred)
     print ('accuracy %f' % accuracy)
