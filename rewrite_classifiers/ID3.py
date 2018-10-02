@@ -45,8 +45,8 @@ class ID3():
 
     def _major_voting(self,x,y):
         labels = np.unique(y)
-        labels_cnt = [len(y==each) for each in labels]
-        return np.argmax(labels_cnt),max(labels_cnt)
+        labels_cnt = [sum(y == each) for each in labels]
+        return np.argmax(labels_cnt), max(labels_cnt)
 
     def _choose_best_feature(self,x,y,label):
         N,dims = x.shape
