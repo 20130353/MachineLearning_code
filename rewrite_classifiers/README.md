@@ -15,7 +15,5 @@ this repository offers some handwriting code of machine learning famous algorith
 ## data
   data 1: breast cancer datset, which comes from the scikit-learn.datasets package           
   data 2: xigua data.csv, which is download from google.
-  
 
- 
 
