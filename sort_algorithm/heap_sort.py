@@ -9,11 +9,13 @@ import numpy as np
 import copy
 
 # data in python is object and could be modified anywhere
+# heap sort looks like the quick sort
 def build_heap(data,size):
     for i in range(np.int(size/2),0,-1):
         adjust_heap(data,i,size)
 
 def adjust_heap(data, i, size):
+    # define the indices of child nodes
     left_child = 2 * i + 1
     right_child = 2 * i + 2
     max = i
