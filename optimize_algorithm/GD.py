@@ -21,12 +21,15 @@ def bgd(alpha, x, y, num_iter):
     for iter in range(0, num_iter):
         hypothesis = np.dot(x, theta) # inner product: w*x
         loss = y - hypothesis # whole loss of whole samples
-        J = np.sum(loss ** 2) / (2 * m)  # whole samples cost: sum[(yi-wi*xi)^2]/2m
-        J_list.append(J)
-        print("iter %s | J: %.3f" % (iter, J))
 
         gradient = np.dot(x_transpose, loss) / m # (y-w*x)*x]
+        print('gradient',gradient)
         theta += alpha * gradient  # update w
+
+        # print Loss of samples
+        J = np.sum(loss ** 2) / (2 * m)  # whole samples cost: sum[(yi-wi*xi)^2]/2m
+        J_list.append(J)
+        # print("iter %s | J: %.3f" % (iter, J))
 
     return theta,J_list
 
@@ -226,35 +229,35 @@ if __name__ == '__main__':
     theta_bgd,J_bgd = bgd(alpha, x, y, max_iter)
     ax.plot(J_bgd,color='k',linestyle='-')
 
-    print("\n#***SGD***#\n")
-    theta_sgd,J_sgd = sgd(alpha, x, y, max_iter)
-    ax.plot(J_sgd, color='red', linestyle='-')
-
-    print("\n#***MBGD***#\n")
-    theta_mbgd,J_mbgd = mbgd(alpha, x, y, max_iter, 10)
-    ax.plot(J_mbgd, color='darkgoldenrod', linestyle='-')
-
-    print("\n#*** Momentum ***#\n")
-    theta_momentum,J_momentum = momentum(alpha, x, y, max_iter, minibatches=10, momentum=0.9)
-    ax.plot(J_momentum, color='blue', linestyle='-')
-
-    print("\n#*** Nesterov ***#\n")
-    theta_Nesterov,J_nesterov = Nesterov(alpha, x, y, max_iter, minibatches=10, momentum=0.9)
-    ax.plot(J_nesterov, color='brown', linestyle='-')
-
-
-    print("\n#*** Adagrad ***#\n")
-    theta_Adagrad,J_adagrad = Adagrad(alpha, x, y, max_iter)
-    ax.plot(J_adagrad, color='fuchsia', linestyle='-',linewidth='3')
-
-    # RMS 和 Ada 颜色是混在一起的
-    print("\n#***  RMSprop ***#\n")
-    theta_RMSprop,J_RMSprop =  RMSprop(alpha, x, y, max_iter)
-    ax.plot(J_RMSprop, color='green', linestyle='-',linewidth='2')
-
-    plt.legend(['BGD','SGD','MBGD','Momentum','Nesterov','Adagrad','RMSprop'])
-
-    plt.savefig('maxiter-'+str(max_iter)+'-sample-'+str(sample_size)+'-feature-'+str(feature_size)+'.tif')
-    # plt.show()
-    print("Done!")
+    # print("\n#***SGD***#\n")
+    # theta_sgd,J_sgd = sgd(alpha, x, y, max_iter)
+    # ax.plot(J_sgd, color='red', linestyle='-')
+    #
+    # print("\n#***MBGD***#\n")
+    # theta_mbgd,J_mbgd = mbgd(alpha, x, y, max_iter, 10)
+    # ax.plot(J_mbgd, color='darkgoldenrod', linestyle='-')
+    #
+    # print("\n#*** Momentum ***#\n")
+    # theta_momentum,J_momentum = momentum(alpha, x, y, max_iter, minibatches=10, momentum=0.9)
+    # ax.plot(J_momentum, color='blue', linestyle='-')
+    #
+    # print("\n#*** Nesterov ***#\n")
+    # theta_Nesterov,J_nesterov = Nesterov(alpha, x, y, max_iter, minibatches=10, momentum=0.9)
+    # ax.plot(J_nesterov, color='brown', linestyle='-')
+    #
+    #
+    # print("\n#*** Adagrad ***#\n")
+    # theta_Adagrad,J_adagrad = Adagrad(alpha, x, y, max_iter)
+    # ax.plot(J_adagrad, color='fuchsia', linestyle='-',linewidth='3')
+    #
+    # # RMS 和 Ada 颜色是混在一起的
+    # print("\n#***  RMSprop ***#\n")
+    # theta_RMSprop,J_RMSprop =  RMSprop(alpha, x, y, max_iter)
+    # ax.plot(J_RMSprop, color='green', linestyle='-',linewidth='2')
+    #
+    # plt.legend(['BGD','SGD','MBGD','Momentum','Nesterov','Adagrad','RMSprop'])
+    #
+    # plt.savefig('maxiter-'+str(max_iter)+'-sample-'+str(sample_size)+'-feature-'+str(feature_size)+'.tif')
+    # # plt.show()
+    # print("Done!")
 
