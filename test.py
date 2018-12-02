@@ -1,34 +1,42 @@
-# -*- coding: utf-8 -*-
-# author: sunmengxin
-# time: 18-11-8
-# file: test
-# description:
+import copy as cp
 
-def solution(str):
-  stack = []
-  res = [0]
-  for each in str:
-      if each == '(':
-        stack.append(each)
-      elif each == ')':
-          if len(stack) != 0:
-            top = stack.pop()
-            if top != '(':
-              res.append(0)
-              stack.append(top)  #  放回去，以免漏匹配
-            else:
-              res.append(res[-1]+1)  # 匹配正确+1
+def compare(left, right, left_index, right_index):
+    if len(right) <= right_index or left[left_index] > right[right_index]:
+        return left + right
+    elif len(left) <= left_index or left[left_index] < right[right_index]:
+        return right + left
+    else:
+        return compare(left, right, left_index + 1, right_index + 1)
 
-      else:
-        print('unknown char!')
-      return max(res)
+
+def solution(arr):
+    dict = {'1': [], '2': [], '3': [], '4': [], '5': [], '6': [], '7': [], '8': [], '9': []}
+    for each in arr:
+        num = str(each)[0]
+        dict[num].append(str(each))
+
+    for key, item in dict.items():
+        item_copy = cp.deepcopy(item)
+        item_copy = sorted(item_copy)
+        while (len(item_copy) != 1 and item_copy):
+            left = item_copy.pop()
+            right = item_copy.pop()
+            res = compare(left, right, 0, 0)
+            # print(res)
+            item_copy.append(res)
+        dict[key] = item_copy
+
+    res = ''
+    for i in range(9, 0,-1):
+        if dict[str(i)]:
+            res = res + dict[str(i)][0]
+    return res
 
 
 if __name__ == '__main__':
-  str = '(()'
-  str1 = '()())'
-  str2 ='fdasfas()'
-  str3 = '()('
+    n = int(input().strip())
+    arr = list(map(int, input().strip().split(' ')))
+    # print(arr)
+    res = solution(arr)
+    print(res)
 
-  res = solution(str)
-  print(res)
